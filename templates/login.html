@@ -26,8 +26,8 @@
                     </li>
                 </ul>
                 <div class="d-flex">
-                    <a href="/login" class="btn btn-outline-light me-2 active">Login</a>
-                    <a href="/register" class="btn btn-primary">Register</a>
+                    <a href="/login" class="btn btn-primary me-2 active">Login</a>
+                    <a href="/register" class="btn btn-outline-light">Register</a>
                 </div>
             </div>
         </div>
@@ -40,7 +40,7 @@
                 <div class="col-md-6 col-lg-5">
                     <div class="card shadow">
                         <div class="card-body p-4">
-                            <h2 class="card-title text-center mb-4">Login</h2>
+                            <h2 class="card-title text-center mb-4">Log In</h2>
                             
                             <!-- Flash Messages -->
                             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -54,16 +54,19 @@
                                 {% endif %}
                             {% endwith %}
                             
-                            <form method="post" action="{{ url_for('login') }}">
+                            <form method="post" action="{{ url_for('login') }}" class="needs-validation" novalidate>
                                 <div class="mb-3">
                                     <label for="username_or_email" class="form-label">Username or Email</label>
-                                    <input type="text" class="form-control" id="username_or_email" name="username_or_email" required>
+                                    <input type="text" class="form-control" id="username_or_email" name="username_or_email" required autofocus>
+                                    <div class="invalid-feedback">
+                                        Please enter your username or email.
+                                    </div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="password" class="form-label">Password</label>
                                     <input type="password" class="form-control" id="password" name="password" required>
-                                    <div class="form-text text-end">
-                                        <a href="/forgot-password" class="text-decoration-none">Forgot password?</a>
+                                    <div class="invalid-feedback">
+                                        Please enter your password.
                                     </div>
                                 </div>
                                 <div class="mb-3 form-check">
@@ -71,14 +74,15 @@
                                     <label class="form-check-label" for="remember">Remember me</label>
                                 </div>
                                 <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary">Login</button>
+                                    <button type="submit" class="btn btn-primary">Log In</button>
                                 </div>
                             </form>
                             
                             <hr class="my-4">
                             
                             <div class="text-center">
-                                <p class="mb-0">Don't have an account? <a href="/register" class="text-decoration-none">Register</a></p>
+                                <p class="mb-3">Don't have an account? <a href="/register" class="text-decoration-none">Register</a></p>
+                                <p class="mb-0"><a href="/forgot-password" class="text-decoration-none">Forgot password?</a></p>
                             </div>
                         </div>
                     </div>
