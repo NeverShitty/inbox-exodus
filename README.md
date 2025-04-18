@@ -1,1 +1,1 @@
-# inbox-exedus
+# inbox-exodus
