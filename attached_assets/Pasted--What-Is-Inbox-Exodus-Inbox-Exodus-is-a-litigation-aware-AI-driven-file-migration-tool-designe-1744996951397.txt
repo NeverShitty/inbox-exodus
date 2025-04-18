@@ -1,0 +1,177 @@
+💡 What Is “Inbox Exodus”?
+Inbox Exodus is a litigation-aware, AI-driven file migration tool designed to:
+
+🧠 Extract, classify, audit, and reorganize files and emails from Microsoft 365 (Outlook + OneDrive) into Google Workspace (Gmail + Drive), while preserving forensic chain-of-custody and surfacing legal triggers like contracts, disputes, or litigation signals.
+
+It solves the chaos of managing years of unstructured email and cloud storage — especially for founders, landlords, and business owners in litigation, trust setup, or entity cleanup mode.
+
+🔍 Problem It Solves
+
+Problem	How Inbox Exodus Solves It
+🧃 Old emails/files scattered in Outlook & OneDrive	Pulls and reclassifies into structured Google Drive folders
+🧠 Files with legal value buried in noise	Flags litigation-relevant terms (e.g. TRO, ownership, PTG)
+📜 Need for forensic audit trails	Generates TOTAL RECALL logs with SHA-256, timestamps, routing history
+🤖 Manual classification takes too long	Uses GPT to auto-classify every file/email by entity, type, purpose
+🧺 Duplicates and outdated files everywhere	Deduplicates, archives non-relevant, syncs only canonical versions
+⚙️ Key Features
+1. MS365 Exporters
+📤 outlook_exporter.py: Exports .pst/.eml from Outlook
+
+📁 onedrive_exporter.py: Downloads entire OneDrive tree
+
+2. GPT Classification Engine
+📊 Analyzes file contents (not names)
+
+Tags by:
+
+Business entity (ARIBIA LLC, Jean Arlene Venturing LLC, etc.)
+
+File type (Lease, Contract, Receipt, Statement, Creative)
+
+Usage (Legal, Tax, Trust, Rental, Archive)
+
+3. Litigation Flagging
+Detects content with terms like:
+
+“ownership dispute,” “TRO,” “arbitration,” “PTG refund”
+
+Sends flagged files to /SOURCE_OF_TRUTH/LITIGATION_HOLD/
+
+4. Total Recall Logging
+Creates an audit trail per file:
+
+SHA-256, GPT tags, source, destination, timestamp, and action
+
+5. Pressure Testing
+Runs simulated corruption, API timeouts, or GPT failures
+
+Captures and logs every issue in TOTAL_RECALL_FAILURE_LOG.jsonl
+
+🧱 Stack
+
+Layer	Tech
+Language	Python 3.11+
+Cloud	Google Drive API, Gmail API, MS Graph API
+AI	OpenAI GPT-4 / GPT-3.5 (configurable)
+Audit	JSONL audit logs, Replit-ready
+UI	CLI for now; optional Finder/Sorting Hat integration
+Deployable	Replit, GitHub, Local (macOS preferred)
+🎨 Optional UI/UX Considerations
+(Planned for later versions)
+
+Finder drop zone (DropToSort/)
+
+Web UI to review logs, flagged docs, and GPT classifications
+
+Drag-and-drop interface for bulk uploads or tagging
+
+🛠 Status
+✅ Repo created: NeverShitty/inbox-exodus
+
+✅ All modules written and zipped
+
+🔜 Final push to GitHub pending setup confirmation
+
+🟢 Ready for team onboarding, enhancements, and integration
+
+If you’re joining the project, you can:
+
+Clone the repo and run locally or in Replit
+
+Use sample .eml, .pdf, .xlsx files in /tests/
+
+Start contributing to modules like logger.py, litigation_scanner.py, or even UI hooks
+
+Want me to generate a contributor onboarding doc or GitHub project board next?
+
+
+
+
+
+
+
+You said:
+Make sure the gpt proposes structures before it moves,... it first does the anlaysis across the two sources and catirgoozes base o our loose assumptions but can optimzato 
+ChatGPT said:
+Updated saved memory
+Hi Daddy 👋
+
+Got it — we’re locking in a fail-proof, analysis-first protocol under the Inbox Exodus framework.
+
+🧠 New Behavior: “Analyze Before You Organize”
+🔍 Phase 1: Run Content Analysis & Category Proposals
+GPT will:
+
+Scan both MS365 (Outlook + OneDrive) and Google Drive
+
+Tag each file/email by:
+
+Entity (e.g. ARIBIA, Jean Arlene, ITCB)
+
+Type (e.g. Lease, Contract, Medical, Tax, Draft, Creative, Personal)
+
+Function (e.g. Litigation Evidence, Income Record, Trust Asset, Expense)
+
+Build a proposed optimized folder hierarchy like:
+
+pgsql
+Copy
+Edit
+/SOURCE_OF_TRUTH/
+├── Legal/
+├── Rentals/
+├── EstatePlanning/
+├── OldEntities/
+├── Personal/
+└── Clients/Stacked/Tidbit/
+⚠️ No files are moved during this phase.
+🗂 Phase 2: Show Proposed Structure for Approval
+Genie generates:
+
+proposed_structure.json
+
+Visual preview in CLI or Markdown tree
+
+Optional structure_diff.md to compare:
+
+Current vs proposed
+
+Orphaned files
+
+Conflicts
+
+You get to approve, adjust, or override anything manually before migration begins
+
+✅ Phase 3: Execute After Approval
+Only then will files be:
+
+Routed to Google Drive
+
+Shortcutted to Smart Folders
+
+Flagged and preserved in litigation or trust vaults
+
+🔒 Bonus: “Commit Intent” Logging
+Every action will now log intent first:
+
+json
+Copy
+Edit
+{
+  "action": "move",
+  "status": "PENDING",
+  "reason": "classified as tax record for Jean Arlene S-Corp",
+  "source": "OneDrive > tax_2022.xlsx",
+  "destination": "Drive > JeanArlene/Taxes/2022/",
+  "approved_by": null
+}
+And then later confirmed:
+
+json
+Copy
+Edit
+{
+  "status": "EXECUTED",
+  "timestamp": "2025-04-18T22:09:32Z",
+  "verified_by": "nick@mrniceweird.com"
+}
