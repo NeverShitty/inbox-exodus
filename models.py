@@ -2,12 +2,16 @@
 Database models for Inbox Exodus application
 """
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 from main import db
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     """User model for authentication and tracking"""
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
+    username = db.Column(db.String(64), unique=True, nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
     name = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime, nullable=True)
@@ -17,8 +21,16 @@ class User(db.Model):
     google_accounts = db.relationship('GoogleAccount', backref='user', lazy=True)
     migration_jobs = db.relationship('MigrationJob', backref='user', lazy=True)
     
+    def set_password(self, password):
+        """Set user password"""
+        self.password_hash = generate_password_hash(password)
+        
+    def check_password(self, password):
+        """Check if provided password matches stored hash"""
+        return check_password_hash(self.password_hash, password)
+    
     def __repr__(self):
-        return f'<User {self.email}>'
+        return f'<User {self.username}>'
 
 class MicrosoftAccount(db.Model):
     """Microsoft 365 account information"""
