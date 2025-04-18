@@ -45,16 +45,27 @@ A litigation-aware, AI-driven file migration tool designed to extract, classify,
 | Layer | Tech |
 |-------|------|
 | Language | Python 3.11+ |
+| Framework | Flask, SQLAlchemy |
 | Cloud | Google Drive API, Gmail API, MS Graph API |
-| AI | OpenAI GPT-4o / GPT-3.5 (configurable) |
-| Audit | JSONL audit logs |
-| UI | Rich CLI |
+| AI | OpenAI GPT-4o (the newest OpenAI model) |
+| Database | PostgreSQL |
+| Audit | JSONL audit logs + SQL database |
+| UI | Web interface + Rich CLI |
+
+## 🚀 Project Status
+
+This project has been transitioned from a CLI-based tool to a full web application with:
+
+- **Database Integration**: PostgreSQL with SQLAlchemy ORM for structured data storage
+- **Modern Web Interface**: Bootstrap-based responsive design
+- **API Endpoints**: Structured REST API for extensibility
+- **Cloud-Ready**: Designed to run on Replit or any cloud provider
 
 ## 🛠️ Installation
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/NeverShitty/inbox-exodus.git
+   git clone https://github.com/yourusername/inbox-exodus.git
    cd inbox-exodus
    ```
 
@@ -65,6 +76,9 @@ A litigation-aware, AI-driven file migration tool designed to extract, classify,
 
 3. Configure environment variables:
    ```bash
+   # Database connection
+   export DATABASE_URL="postgresql://user:password@localhost:5432/inboxexodus"
+   
    # Microsoft 365 API credentials
    export MS_CLIENT_ID="your_ms_client_id"
    export MS_CLIENT_SECRET="your_ms_client_secret"
@@ -77,10 +91,54 @@ A litigation-aware, AI-driven file migration tool designed to extract, classify,
    
    # OpenAI API key
    export OPENAI_API_KEY="your_openai_api_key"
+   
+   # Session secret for Flask
+   export SESSION_SECRET="your_secure_session_secret"
    ```
 
 ## 🚀 Usage
 
-Run the application:
-```bash
-python main.py
+1. Run the web application:
+   ```bash
+   gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app
+   ```
+
+2. Visit the application in your browser at `http://localhost:5000`
+
+## 📊 Database Structure
+
+The application uses a PostgreSQL database with the following main models:
+
+- **User**: Application users and authentication
+- **MicrosoftAccount**: Microsoft 365 connection information
+- **GoogleAccount**: Google Workspace connection information
+- **MigrationJob**: File migration job tracking
+- **FileItem**: Individual file or email being migrated
+- **AuditLog**: Comprehensive audit trail for all operations
+- **FolderStructure**: Proposed and approved folder structures
+
+## 🔄 Three-Phase Migration Process
+
+Our migration process follows a careful, methodical approach:
+
+1. **Analyze Phase**: 
+   - Extract and analyze files from Microsoft 365
+   - Classify content with GPT
+   - Detect litigation-related terms
+
+2. **Propose Phase**:
+   - Generate intelligent folder structure proposal
+   - Present to user for review and approval
+   - Allow customization before proceeding
+
+3. **Execute Phase**:
+   - Create approved folder structure in Google Workspace
+   - Migrate files with integrity validation
+   - Generate comprehensive audit logs
+
+## 🛡️ Security and Compliance
+
+- **Chain of Custody**: SHA-256 hashing ensures file integrity throughout migration
+- **Litigation Awareness**: Automatic detection of legal terms flags sensitive content
+- **Audit Trail**: Comprehensive logging of all actions for compliance requirements
+- **Secure Authentication**: OAuth 2.0 for Microsoft and Google integrations
