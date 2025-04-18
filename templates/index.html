@@ -5,29 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ app_name }} - AI-Driven File Migration Tool</title>
     <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
-    <style>
-        .workflow-step {
-            transition: all 0.3s ease;
-            border: 1px solid var(--bs-border-color);
-        }
-        
-        .workflow-step:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-        
-        .feature-icon {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-        
-        .header-section {
-            padding: 5rem 0;
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1740&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
     <!-- Navigation -->
@@ -46,86 +25,166 @@
                         <a class="nav-link active" href="/">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                        <a class="nav-link" href="#features">Features</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/migrations">Migrations</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/settings">Settings</a>
+                        <a class="nav-link" href="#how-it-works">How It Works</a>
                     </li>
                 </ul>
                 <div class="d-flex">
-                    <a href="/login" class="btn btn-outline-light me-2">Login</a>
-                    <a href="/register" class="btn btn-primary">Register</a>
+                    {% if current_user.is_authenticated %}
+                        <a href="/dashboard" class="btn btn-primary me-2">Dashboard</a>
+                        <a href="/logout" class="btn btn-outline-light">Logout</a>
+                    {% else %}
+                        <a href="/login" class="btn btn-primary me-2">Login</a>
+                        <a href="/register" class="btn btn-outline-light">Register</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </nav>
 
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
     <!-- Hero Section -->
-    <section class="header-section">
-        <div class="container text-white text-center">
-            <h1 class="display-4 fw-bold mb-4">Inbox Exodus</h1>
-            <p class="lead mb-5">A litigation-aware, AI-driven file migration tool designed to extract, classify, audit, and reorganize files and emails from Microsoft 365 to Google Workspace.</p>
-            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                <a href="/get-started" class="btn btn-primary btn-lg px-4 gap-3">Get Started</a>
-                <a href="#learn-more" class="btn btn-outline-light btn-lg px-4">Learn More</a>
+    <section class="py-5 bg-dark text-white position-relative">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-5 mb-lg-0">
+                    <h1 class="display-4 fw-bold mb-3">Litigation-Aware AI File Migration</h1>
+                    <p class="lead mb-4">Extract, classify, audit, and reorganize your files from Microsoft 365 to Google Workspace while preserving forensic chain-of-custody and surfacing legal triggers.</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% if current_user.is_authenticated %}
+                            <a href="/dashboard" class="btn btn-primary btn-lg">Go to Dashboard</a>
+                        {% else %}
+                            <a href="/register" class="btn btn-primary btn-lg">Get Started</a>
+                            <a href="/login" class="btn btn-outline-light btn-lg">Log In</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center">
+                    <div class="position-relative">
+                        <div class="bg-dark p-4 rounded-4 shadow-lg border border-2 border-secondary">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="rounded-circle bg-primary p-3 me-3">
+                                    <i class="bi bi-microsoft text-white" style="font-size: 2rem;"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <i class="bi bi-arrow-right text-white" style="font-size: 2rem;"></i>
+                                </div>
+                                <div class="rounded-circle bg-primary p-3">
+                                    <i class="bi bi-google text-white" style="font-size: 2rem;"></i>
+                                </div>
+                            </div>
+                            <div class="progress mb-3" style="height: 30px;">
+                                <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: 75%;" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">Migrating Files</div>
+                            </div>
+                            <div class="border border-secondary rounded p-3 text-start mb-3">
+                                <p class="text-secondary m-0"><i class="bi bi-check-circle-fill text-success me-2"></i> <span class="text-light">Contract_2023_Final.docx</span> - <span class="badge bg-success">Migrated</span></p>
+                                <p class="text-secondary m-0"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i> <span class="text-light">Legal_Dispute_PTG.pdf</span> - <span class="badge bg-warning">Litigation Hold</span></p>
+                                <p class="text-secondary m-0"><i class="bi bi-arrow-right-circle-fill text-info me-2"></i> <span class="text-light">Q2_Financial_Summary.xlsx</span> - <span class="badge bg-info">In Progress</span></p>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="badge bg-secondary p-2">
+                                    <i class="bi bi-lock-fill me-1"></i> Secure Migration
+                                </span>
+                                <span class="badge bg-secondary p-2">
+                                    <i class="bi bi-shield-check me-1"></i> AI-Powered
+                                </span>
+                                <span class="badge bg-secondary p-2">
+                                    <i class="bi bi-file-earmark-check me-1"></i> Forensic Chain
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section class="py-5" id="learn-more">
+    <section id="features" class="py-5">
         <div class="container">
             <div class="text-center mb-5">
-                <h2 class="fw-bold">The Problems We Solve</h2>
-                <p class="lead text-muted">Managing years of unstructured emails and files is a challenge - especially for those in litigation, trust setup, or entity cleanup mode.</p>
+                <h2 class="display-5 fw-bold">Key Features</h2>
+                <p class="lead text-muted">Designed for founders, landlords, and business owners dealing with years of unstructured files</p>
             </div>
-
             <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card h-100 workflow-step">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon text-primary">🧃</div>
-                            <h5 class="card-title">Scattered Files</h5>
-                            <p class="card-text">Old emails/files scattered across Outlook & OneDrive are pulled and reclassified into structured Google Drive folders.</p>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="rounded-circle bg-primary p-3 d-inline-flex mb-3">
+                                <i class="bi bi-search text-white" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <h3 class="h4 card-title">Intelligent Extraction</h3>
+                            <p class="card-text">Extract emails and files from Microsoft 365 (Outlook + OneDrive) with intelligent filtering to focus on what matters.</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card h-100 workflow-step">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon text-primary">🧠</div>
-                            <h5 class="card-title">Legal Value Buried in Noise</h5>
-                            <p class="card-text">We automatically flag litigation-relevant terms (e.g. TRO, ownership, arbitration) to surface important documents.</p>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="rounded-circle bg-primary p-3 d-inline-flex mb-3">
+                                <i class="bi bi-tags text-white" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <h3 class="h4 card-title">AI Classification</h3>
+                            <p class="card-text">Categorize files using GPT for semantic understanding, grouping related documents regardless of naming conventions.</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card h-100 workflow-step">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon text-primary">📜</div>
-                            <h5 class="card-title">Forensic Audit Trails</h5>
-                            <p class="card-text">Creates comprehensive TOTAL RECALL logs with SHA-256 hashing, timestamps, and complete routing history.</p>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="rounded-circle bg-primary p-3 d-inline-flex mb-3">
+                                <i class="bi bi-shield-lock text-white" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <h3 class="h4 card-title">Litigation Awareness</h3>
+                            <p class="card-text">Automatically flag files with legal implications, contracts, disputes, or litigation signals for special handling.</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="card h-100 workflow-step">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon text-primary">🤖</div>
-                            <h5 class="card-title">Manual Classification Takes Too Long</h5>
-                            <p class="card-text">Uses GPT to automatically classify every file/email by entity, type, and purpose, saving countless hours of manual work.</p>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="rounded-circle bg-primary p-3 d-inline-flex mb-3">
+                                <i class="bi bi-folder-symlink text-white" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <h3 class="h4 card-title">Intelligent Reorganization</h3>
+                            <p class="card-text">Propose organized folder structures based on content relationships, user access patterns, and intuitive discoverability.</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="card h-100 workflow-step">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon text-primary">🧺</div>
-                            <h5 class="card-title">Duplicates Everywhere</h5>
-                            <p class="card-text">Deduplicates files, archives non-relevant content, and ensures only canonical versions are synced to your new structure.</p>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="rounded-circle bg-primary p-3 d-inline-flex mb-3">
+                                <i class="bi bi-journal-check text-white" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <h3 class="h4 card-title">Audit & Verification</h3>
+                            <p class="card-text">SHA-256 hash verification and comprehensive logging ensure forensic chain-of-custody throughout the migration process.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="rounded-circle bg-primary p-3 d-inline-flex mb-3">
+                                <i class="bi bi-google text-white" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <h3 class="h4 card-title">Google Migration</h3>
+                            <p class="card-text">Securely transfer all files to Google Workspace (Gmail + Drive) with preserved metadata and intelligent mapping.</p>
                         </div>
                     </div>
                 </div>
@@ -133,102 +192,65 @@
         </div>
     </section>
 
-    <!-- Workflow Section -->
-    <section class="py-5 bg-dark text-white">
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-5 bg-dark text-white">
         <div class="container">
             <div class="text-center mb-5">
-                <h2 class="fw-bold">Three-Phase Workflow</h2>
-                <p class="lead">Our AI-driven analysis never blindly moves your files. You stay in control of the entire process.</p>
+                <h2 class="display-5 fw-bold">How It Works</h2>
+                <p class="lead">Our three-phase process ensures a smooth, accurate transition</p>
             </div>
-
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <div class="card bg-dark border-primary h-100">
-                        <div class="card-body text-center p-4">
-                            <h3 class="fw-bold text-primary">Phase 1: Analyze</h3>
-                            <div class="p-3">
-                                <p>Extract and classify files from Microsoft 365 using AI analysis.</p>
-                                <ul class="list-unstyled text-start">
-                                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i> Connect to Microsoft 365</li>
-                                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i> Extract files and emails</li>
-                                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i> Analyze content with GPT</li>
-                                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i> Flag litigation-relevant terms</li>
-                                </ul>
+            <div class="row justify-content-center mb-4">
+                <div class="col-lg-10">
+                    <div class="position-relative mb-5">
+                        <div class="d-flex justify-content-between position-relative mb-4">
+                            <div class="text-center" style="width: 33%;">
+                                <div class="position-relative">
+                                    <div class="bg-primary rounded-circle mx-auto d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                        <i class="bi bi-1-circle-fill text-white" style="font-size: 2rem;"></i>
+                                    </div>
+                                    <div class="progress position-absolute" style="height: 5px; top: 50%; width: 100%; z-index: -1;">
+                                        <div class="progress-bar" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                                <h3 class="h4 mt-3">Extract & Analyze</h3>
+                                <p class="text-muted">Connect your accounts and let our AI extract and analyze your data</p>
+                            </div>
+                            <div class="text-center" style="width: 33%;">
+                                <div class="bg-primary rounded-circle mx-auto d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                    <i class="bi bi-2-circle-fill text-white" style="font-size: 2rem;"></i>
+                                </div>
+                                <h3 class="h4 mt-3">Review & Approve</h3>
+                                <p class="text-muted">Review the proposed organization and make any adjustments</p>
+                            </div>
+                            <div class="text-center" style="width: 33%;">
+                                <div class="bg-primary rounded-circle mx-auto d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                    <i class="bi bi-3-circle-fill text-white" style="font-size: 2rem;"></i>
+                                </div>
+                                <h3 class="h4 mt-3">Migrate & Verify</h3>
+                                <p class="text-muted">Execute the migration and verify successful transfer</p>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card bg-dark border-primary h-100">
-                        <div class="card-body text-center p-4">
-                            <h3 class="fw-bold text-primary">Phase 2: Propose</h3>
-                            <div class="p-3">
-                                <p>Generate folder structure proposal based on AI classification.</p>
-                                <ul class="list-unstyled text-start">
-                                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i> Group by entity, type, purpose</li>
-                                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i> Create optimized structure</li>
-                                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i> Identify duplicates</li>
-                                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i> Present for your approval</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card bg-dark border-primary h-100">
-                        <div class="card-body text-center p-4">
-                            <h3 class="fw-bold text-primary">Phase 3: Execute</h3>
-                            <div class="p-3">
-                                <p>Migrate files to Google Workspace after your approval.</p>
-                                <ul class="list-unstyled text-start">
-                                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i> Connect to Google Workspace</li>
-                                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i> Create approved structure</li>
-                                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i> Migrate files with integrity checks</li>
-                                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i> Generate comprehensive audit logs</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            </div>
+            <div class="text-center mt-4">
+                <a href="/register" class="btn btn-primary btn-lg">Start Your Migration Journey</a>
             </div>
         </div>
     </section>
 
-    <!-- Get Started Section -->
+    <!-- CTA Section -->
     <section class="py-5">
         <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6 mb-4 mb-lg-0">
-                    <h2 class="fw-bold mb-4">Ready to organize your digital life?</h2>
-                    <p class="lead mb-4">Inbox Exodus provides a seamless, intelligent way to migrate your digital assets from Microsoft 365 to Google Workspace while maintaining legal integrity and organizational clarity.</p>
-                    <div class="d-grid gap-2 d-md-flex">
-                        <a href="/register" class="btn btn-primary btn-lg">Get Started Now</a>
-                        <a href="/contact" class="btn btn-outline-secondary btn-lg">Contact Us</a>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="card">
-                        <div class="card-body p-4">
-                            <h4 class="card-title mb-4">API Status</h4>
-                            <div class="d-flex justify-content-between mb-3">
-                                <span>System Status:</span>
-                                <span class="badge bg-success">Operational</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-3">
-                                <span>Microsoft Graph API:</span>
-                                <span class="badge bg-info">Ready to Connect</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-3">
-                                <span>Google Workspace API:</span>
-                                <span class="badge bg-info">Ready to Connect</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-3">
-                                <span>OpenAI GPT:</span>
-                                <span class="badge bg-info">Ready to Analyze</span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span>Database:</span>
-                                <span class="badge bg-success">Connected</span>
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-body p-5 text-center">
+                            <h2 class="h1 mb-3">Ready to organize your digital life?</h2>
+                            <p class="lead mb-4">Join thousands of professionals who've simplified their file management with Inbox Exodus</p>
+                            <div class="d-flex justify-content-center flex-wrap gap-2">
+                                <a href="/register" class="btn btn-primary btn-lg">Get Started Free</a>
+                                <a href="#features" class="btn btn-outline-secondary btn-lg">Learn More</a>
                             </div>
                         </div>
                     </div>
@@ -242,38 +264,51 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-4 mb-4 mb-md-0">
-                    <h5>Inbox Exodus</h5>
-                    <p class="text-muted">AI-Driven File Migration Tool</p>
-                    <p class="small">&copy; 2025 Inbox Exodus. All rights reserved.</p>
+                    <h5 class="mb-3">{{ app_name }}</h5>
+                    <p class="text-muted">AI-Driven File Migration Tool for litigation-aware organization and structured transitions from Microsoft 365 to Google Workspace.</p>
+                    <div class="d-flex gap-2">
+                        <a href="#" class="btn btn-outline-light btn-sm"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="btn btn-outline-light btn-sm"><i class="bi bi-linkedin"></i></a>
+                        <a href="#" class="btn btn-outline-light btn-sm"><i class="bi bi-facebook"></i></a>
+                    </div>
                 </div>
                 <div class="col-md-2 mb-4 mb-md-0">
-                    <h6>Company</h6>
+                    <h5 class="mb-3">Links</h5>
                     <ul class="list-unstyled">
-                        <li><a href="/about" class="text-decoration-none text-muted">About Us</a></li>
-                        <li><a href="/contact" class="text-decoration-none text-muted">Contact</a></li>
-                        <li><a href="/blog" class="text-decoration-none text-muted">Blog</a></li>
+                        <li><a href="/" class="text-decoration-none text-muted">Home</a></li>
+                        <li><a href="#features" class="text-decoration-none text-muted">Features</a></li>
+                        <li><a href="#how-it-works" class="text-decoration-none text-muted">How It Works</a></li>
+                        <li><a href="/login" class="text-decoration-none text-muted">Login</a></li>
+                        <li><a href="/register" class="text-decoration-none text-muted">Register</a></li>
                     </ul>
                 </div>
                 <div class="col-md-2 mb-4 mb-md-0">
-                    <h6>Resources</h6>
+                    <h5 class="mb-3">Resources</h5>
                     <ul class="list-unstyled">
-                        <li><a href="/docs" class="text-decoration-none text-muted">Documentation</a></li>
-                        <li><a href="/faq" class="text-decoration-none text-muted">FAQ</a></li>
-                        <li><a href="/api" class="text-decoration-none text-muted">API</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">Documentation</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">API</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">Support</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">Community</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4">
-                    <h6>Stay Connected</h6>
-                    <p class="text-muted small">Subscribe to our newsletter for updates</p>
-                    <div class="input-group mb-3">
-                        <input type="email" class="form-control" placeholder="Your email">
-                        <button class="btn btn-primary" type="button">Subscribe</button>
-                    </div>
-                    <div class="d-flex gap-3">
-                        <a href="#" class="text-decoration-none text-muted"><i class="bi bi-twitter"></i></a>
-                        <a href="#" class="text-decoration-none text-muted"><i class="bi bi-linkedin"></i></a>
-                        <a href="#" class="text-decoration-none text-muted"><i class="bi bi-github"></i></a>
-                    </div>
+                    <h5 class="mb-3">Subscribe</h5>
+                    <p class="text-muted">Get updates on new features and migration tips</p>
+                    <form class="d-flex">
+                        <input type="email" class="form-control me-2" placeholder="Your email">
+                        <button type="submit" class="btn btn-primary">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="small mb-0">&copy; 2025 {{ app_name }}. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <a href="/privacy" class="text-decoration-none text-muted small me-3">Privacy Policy</a>
+                    <a href="/terms" class="text-decoration-none text-muted small me-3">Terms of Service</a>
+                    <a href="/contact" class="text-decoration-none text-muted small">Contact</a>
                 </div>
             </div>
         </div>
@@ -281,7 +316,6 @@
 
     <!-- Bootstrap JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Include icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
