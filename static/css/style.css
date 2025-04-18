@@ -1,0 +1,120 @@
+/* 
+ * Inbox Exodus - Main Stylesheet
+ * Custom styles for the web application
+ */
+
+/* General styling */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Workflow steps */
+.workflow-step {
+    transition: all 0.3s ease;
+    border: 1px solid var(--bs-border-color);
+}
+
+.workflow-step:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Feature icons */
+.feature-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+/* Header section */
+.header-section {
+    padding: 5rem 0;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1740&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+}
+
+/* Custom button styles */
+.btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--bs-primary-dark, #0d47a1);
+    border-color: var(--bs-primary-dark, #0d47a1);
+}
+
+/* Dashboard specific styles */
+.dashboard-stat-card {
+    border-left: 4px solid var(--bs-primary);
+    transition: all 0.2s ease;
+}
+
+.dashboard-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Migration job status indicators */
+.status-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.35em 0.65em;
+    border-radius: 50rem;
+}
+
+.status-pending {
+    background-color: var(--bs-warning);
+    color: var(--bs-dark);
+}
+
+.status-in-progress {
+    background-color: var(--bs-info);
+    color: var(--bs-white);
+}
+
+.status-completed {
+    background-color: var(--bs-success);
+    color: var(--bs-white);
+}
+
+.status-failed {
+    background-color: var(--bs-danger);
+    color: var(--bs-white);
+}
+
+/* Folder tree visualization */
+.folder-tree {
+    font-family: monospace;
+    line-height: 1.5;
+}
+
+.folder-tree .folder-name {
+    font-weight: bold;
+    color: var(--bs-primary);
+}
+
+.folder-tree .file-name {
+    color: var(--bs-secondary);
+}
+
+/* Audit log entries */
+.audit-entry {
+    border-left: 3px solid var(--bs-gray-500);
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+}
+
+.audit-entry.success {
+    border-left-color: var(--bs-success);
+}
+
+.audit-entry.failure {
+    border-left-color: var(--bs-danger);
+}
+
+/* Progress indicators */
+.migration-progress {
+    height: 10px;
+    border-radius: 5px;
+}
