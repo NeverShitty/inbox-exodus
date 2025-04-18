@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }} - Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-folder-symlink me-2"></i>
+                {{ app_name }}
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/migrations">Migrations</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/settings">Settings</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ current_user.username }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="/profile"><i class="bi bi-person me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="/settings"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="container py-5">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="mb-0">Dashboard</h1>
+                <p class="text-muted">Welcome back, {{ current_user.username }}</p>
+            </div>
+            <div class="col-auto">
+                <a href="/migrations/new" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-2"></i>New Migration
+                </a>
+            </div>
+        </div>
+
+        <!-- Connection Status Cards -->
+        <div class="row mb-4">
+            <div class="col-md-6 mb-4 mb-md-0">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-microsoft me-3" style="font-size: 2rem;"></i>
+                            <h5 class="card-title mb-0">Microsoft 365</h5>
+                            {% if ms_connected %}
+                                <span class="badge bg-success ms-auto">Connected</span>
+                            {% else %}
+                                <span class="badge bg-warning ms-auto">Not Connected</span>
+                            {% endif %}
+                        </div>
+                        <p class="card-text">Connect your Microsoft 365 account to extract emails from Outlook and files from OneDrive.</p>
+                        {% if ms_connected %}
+                            <a href="/microsoft/disconnect" class="btn btn-outline-danger btn-sm">Disconnect</a>
+                        {% else %}
+                            <a href="/microsoft/connect" class="btn btn-primary btn-sm">Connect Now</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-google me-3" style="font-size: 2rem;"></i>
+                            <h5 class="card-title mb-0">Google Workspace</h5>
+                            {% if google_connected %}
+                                <span class="badge bg-success ms-auto">Connected</span>
+                            {% else %}
+                                <span class="badge bg-warning ms-auto">Not Connected</span>
+                            {% endif %}
+                        </div>
+                        <p class="card-text">Connect your Google Workspace account to migrate emails to Gmail and files to Google Drive.</p>
+                        {% if google_connected %}
+                            <a href="/google/disconnect" class="btn btn-outline-danger btn-sm">Disconnect</a>
+                        {% else %}
+                            <a href="/google/connect" class="btn btn-primary btn-sm">Connect Now</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Migrations -->
+        <h3 class="mb-3">Recent Migrations</h3>
+        {% if migration_jobs %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Source</th>
+                            <th>Target</th>
+                            <th>Progress</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for job in migration_jobs %}
+                            <tr>
+                                <td>{{ job.name }}</td>
+                                <td>
+                                    {% if job.status == 'pending' %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% elif job.status == 'in_progress' %}
+                                        <span class="badge bg-info">In Progress</span>
+                                    {% elif job.status == 'completed' %}
+                                        <span class="badge bg-success">Completed</span>
+                                    {% elif job.status == 'failed' %}
+                                        <span class="badge bg-danger">Failed</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ job.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ job.source_type|title }}</td>
+                                <td>{{ job.target_type|title }}</td>
+                                <td>
+                                    <div class="progress" style="height: 10px;">
+                                        {% if job.total_files > 0 %}
+                                            {% set percentage = (job.processed_files / job.total_files) * 100 %}
+                                        {% else %}
+                                            {% set percentage = 0 %}
+                                        {% endif %}
+                                        <div class="progress-bar {% if job.status == 'failed' %}bg-danger{% endif %}" role="progressbar" style="width: {{ percentage }}%;" aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <small>{{ job.processed_files }} / {{ job.total_files }}</small>
+                                </td>
+                                <td>{{ job.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    <a href="/migrations/{{ job.id }}" class="btn btn-sm btn-outline-primary">Details</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-end">
+                <a href="/migrations" class="btn btn-link">View All Migrations</a>
+            </div>
+        {% else %}
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-inbox mb-3" style="font-size: 3rem;"></i>
+                    <h5>No Migration Jobs Yet</h5>
+                    <p class="text-muted">Start a new migration to extract and organize your files.</p>
+                    <a href="/migrations/new" class="btn btn-primary">Create Your First Migration</a>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Quick Stats -->
+        <div class="row mt-4">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Migration Process</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <div class="d-flex justify-content-between position-relative mb-4">
+                                <div class="text-center" style="width: 33%;">
+                                    <div class="position-relative">
+                                        <div class="bg-primary rounded-circle mx-auto d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                            <i class="bi bi-1-circle-fill text-white" style="font-size: 2rem;"></i>
+                                        </div>
+                                        <div class="progress position-absolute" style="height: 5px; top: 50%; width: 100%; z-index: -1;">
+                                            <div class="progress-bar" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                    <h6 class="mt-2">Analyze</h6>
+                                    <p class="small text-muted">Extract and analyze with AI</p>
+                                </div>
+                                <div class="text-center" style="width: 33%;">
+                                    <div class="bg-primary rounded-circle mx-auto d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                        <i class="bi bi-2-circle-fill text-white" style="font-size: 2rem;"></i>
+                                    </div>
+                                    <h6 class="mt-2">Propose</h6>
+                                    <p class="small text-muted">Review structure proposals</p>
+                                </div>
+                                <div class="text-center" style="width: 33%;">
+                                    <div class="bg-primary rounded-circle mx-auto d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                        <i class="bi bi-3-circle-fill text-white" style="font-size: 2rem;"></i>
+                                    </div>
+                                    <h6 class="mt-2">Execute</h6>
+                                    <p class="small text-muted">Migrate files and verify</p>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="/guide" class="btn btn-outline-primary w-100">View Migration Guide</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <a href="/migrations/new" class="list-group-item list-group-item-action d-flex align-items-center">
+                                <i class="bi bi-plus-circle me-3 text-primary"></i>
+                                <div>
+                                    <strong>New Migration</strong>
+                                    <div class="small text-muted">Start a new migration job</div>
+                                </div>
+                            </a>
+                            <a href="/microsoft/connect" class="list-group-item list-group-item-action d-flex align-items-center">
+                                <i class="bi bi-microsoft me-3 text-primary"></i>
+                                <div>
+                                    <strong>Connect Microsoft 365</strong>
+                                    <div class="small text-muted">Link your Outlook and OneDrive accounts</div>
+                                </div>
+                            </a>
+                            <a href="/google/connect" class="list-group-item list-group-item-action d-flex align-items-center">
+                                <i class="bi bi-google me-3 text-primary"></i>
+                                <div>
+                                    <strong>Connect Google Workspace</strong>
+                                    <div class="small text-muted">Link your Gmail and Google Drive accounts</div>
+                                </div>
+                            </a>
+                            <a href="/settings" class="list-group-item list-group-item-action d-flex align-items-center">
+                                <i class="bi bi-gear me-3 text-primary"></i>
+                                <div>
+                                    <strong>Settings</strong>
+                                    <div class="small text-muted">Configure your preferences</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-4 bg-dark text-white mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="small mb-0">&copy; 2025 {{ app_name }}. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <a href="/privacy" class="text-decoration-none text-muted small me-3">Privacy Policy</a>
+                    <a href="/terms" class="text-decoration-none text-muted small me-3">Terms of Service</a>
+                    <a href="/contact" class="text-decoration-none text-muted small">Contact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
