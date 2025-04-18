@@ -15,13 +15,13 @@ class Config:
     ms_client_id: str = os.environ.get("MS_CLIENT_ID")
     ms_client_secret: str = os.environ.get("MS_CLIENT_SECRET")
     ms_tenant_id: str = os.environ.get("MS_TENANT_ID")
-    ms_redirect_uri: str = os.environ.get("MS_REDIRECT_URI", "http://localhost:8000/callback")
+    ms_redirect_uri: str = os.environ.get("MS_REDIRECT_URI", "https://inboxexodus.mrniceweird.repl.co/microsoft/callback")
     
     # Google API settings
-    google_client_id: str = os.environ.get("GOOGLE_CLIENT_ID")
-    google_client_secret: str = os.environ.get("GOOGLE_CLIENT_SECRET")
-    google_project_id: str = os.environ.get("GOOGLE_PROJECT_ID")
-    google_redirect_uri: str = os.environ.get("GOOGLE_REDIRECT_URI", "http://localhost:8000/callback")
+    google_client_id: str = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
+    google_client_secret: str = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET")
+    google_project_id: str = os.environ.get("GOOGLE_PROJECT_ID", "inbox-exodus")
+    google_redirect_uri: str = os.environ.get("GOOGLE_REDIRECT_URI", "https://inboxexodus.mrniceweird.repl.co/google/callback")
     
     # Application settings
     temp_dir: str = os.environ.get("TEMP_DIR", "./temp")

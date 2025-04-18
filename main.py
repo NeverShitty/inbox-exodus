@@ -26,6 +26,13 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_pre_ping": True,
 }
 
+# Configure Microsoft and Google OAuth
+app.config["MS_CLIENT_ID"] = os.environ.get("MS_CLIENT_ID")
+app.config["MS_CLIENT_SECRET"] = os.environ.get("MS_CLIENT_SECRET")
+app.config["MS_TENANT_ID"] = os.environ.get("MS_TENANT_ID")
+app.config["GOOGLE_OAUTH_CLIENT_ID"] = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
+app.config["GOOGLE_OAUTH_CLIENT_SECRET"] = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET")
+
 # Initialize SQLAlchemy with Flask
 class Base(DeclarativeBase):
     pass
@@ -59,6 +66,14 @@ import models
 def load_user(user_id):
     """Load user by ID for Flask-Login"""
     return models.User.query.get(int(user_id))
+
+# Import auth modules
+from microsoft_auth import microsoft_auth
+from google_auth import google_auth
+
+# Register blueprints
+app.register_blueprint(microsoft_auth)
+app.register_blueprint(google_auth)
 
 # Create database tables
 with app.app_context():
