@@ -142,3 +142,11 @@ section {
     height: 10px;
     border-radius: 5px;
 }
+
+.rounded-circle {
+    border-radius: 50%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
