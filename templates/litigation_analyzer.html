@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }} - Litigation Analyzer</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-folder-symlink me-2"></i>
+                {{ app_name }}
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/litigation-analyzer">Litigation Analyzer</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <a href="/logout" class="btn btn-outline-light">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Litigation Analyzer Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 mb-4">
+                    <div class="card shadow">
+                        <div class="card-body p-4">
+                            <h2 class="card-title mb-4">
+                                <i class="bi bi-search me-2"></i>
+                                Enhanced Litigation Analysis
+                            </h2>
+                            <p class="card-text">
+                                This tool uses advanced AI to detect litigation-related content in documents and text with legal-specific fine-tuning.
+                                The analyzer examines text for legal terms, regulatory issues, and signs of potential litigation risk.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card shadow mb-4">
+                        <div class="card-header">
+                            <ul class="nav nav-tabs card-header-tabs" id="analyzer-tabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="text-tab" data-bs-toggle="tab" data-bs-target="#text-panel" type="button" role="tab" aria-controls="text-panel" aria-selected="true">
+                                        <i class="bi bi-file-text me-2"></i>Text Analysis
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="file-tab" data-bs-toggle="tab" data-bs-target="#file-panel" type="button" role="tab" aria-controls="file-panel" aria-selected="false">
+                                        <i class="bi bi-file-earmark me-2"></i>File Analysis
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content" id="analyzer-tabs-content">
+                                <!-- Text Analysis Panel -->
+                                <div class="tab-pane fade show active" id="text-panel" role="tabpanel" aria-labelledby="text-tab">
+                                    <form id="text-analysis-form">
+                                        <div class="mb-3">
+                                            <label for="document-name" class="form-label">Document Name (Optional)</label>
+                                            <input type="text" class="form-control" id="document-name" placeholder="Enter a name for this document">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="text-content" class="form-label">Text Content</label>
+                                            <textarea class="form-control" id="text-content" rows="10" placeholder="Paste the text you want to analyze..." required></textarea>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <button type="submit" class="btn btn-primary" id="analyze-text-btn">
+                                                <i class="bi bi-search me-2"></i>Analyze Text
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                                
+                                <!-- File Analysis Panel -->
+                                <div class="tab-pane fade" id="file-panel" role="tabpanel" aria-labelledby="file-tab">
+                                    <form id="file-analysis-form" enctype="multipart/form-data">
+                                        <div class="mb-3">
+                                            <label for="file-upload" class="form-label">Upload File</label>
+                                            <input class="form-control" type="file" id="file-upload" required>
+                                            <div class="form-text">Only text files are supported (TXT, RTF, HTML, etc.)</div>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <button type="submit" class="btn btn-primary" id="analyze-file-btn">
+                                                <i class="bi bi-search me-2"></i>Analyze File
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Litigation Terms Section -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-list-ul me-2"></i>Monitored Litigation Terms
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap">
+                                {% for term in litigation_terms %}
+                                <span class="badge bg-secondary me-2 mb-2">{{ term }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="form-text mt-2">
+                                These terms are automatically detected in document analysis, but AI analysis extends beyond these keywords.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Results Panel -->
+                <div class="col-lg-6">
+                    <div class="card shadow mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-clipboard-data me-2"></i>Analysis Results
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Loading State -->
+                            <div id="analysis-loading" class="d-none text-center py-5">
+                                <div class="spinner-border text-primary mb-3" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="text-muted">Analyzing document with advanced AI...</p>
+                            </div>
+                            
+                            <!-- Empty State -->
+                            <div id="analysis-empty" class="text-center py-5">
+                                <i class="bi bi-search display-1 text-muted"></i>
+                                <p class="text-muted mt-3">Analysis results will appear here.<br>Enter text or upload a file to begin.</p>
+                            </div>
+                            
+                            <!-- Results State -->
+                            <div id="analysis-results" class="d-none">
+                                <!-- Result Header -->
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="risk-indicator me-3">
+                                        <i class="bi bi-shield-fill risk-icon"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="mb-1" id="result-document-name">Document Analysis</h4>
+                                        <div id="result-timestamp" class="text-muted small"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Risk Level -->
+                                <div class="mb-4">
+                                    <h5 class="mb-2">Risk Assessment</h5>
+                                    <div class="d-flex align-items-center">
+                                        <div class="progress flex-grow-1 me-2" style="height: 10px;">
+                                            <div id="risk-level-bar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                        <span id="risk-level-text" class="badge"></span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Detected Terms -->
+                                <div class="mb-4">
+                                    <h5 class="mb-2">Detected Litigation Terms</h5>
+                                    <div id="litigation-terms-detected" class="d-flex flex-wrap"></div>
+                                    <div id="no-terms-message" class="text-muted small">No litigation terms detected.</div>
+                                </div>
+                                
+                                <!-- Legal Categories -->
+                                <div class="mb-4">
+                                    <h5 class="mb-2">Legal Categories</h5>
+                                    <div id="legal-categories" class="d-flex flex-wrap"></div>
+                                    <div id="no-categories-message" class="text-muted small">No specific legal categories identified.</div>
+                                </div>
+                                
+                                <!-- Analysis Summary -->
+                                <div class="mb-4">
+                                    <h5 class="mb-2">Analysis Summary</h5>
+                                    <div class="card bg-dark">
+                                        <div class="card-body" id="analysis-summary">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Meta Information -->
+                                <div class="d-flex justify-content-between text-muted small">
+                                    <div>Confidence Score: <span id="confidence-score">N/A</span></div>
+                                    <div>Powered by Claude AI</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Error State -->
+                            <div id="analysis-error" class="d-none">
+                                <div class="alert alert-danger" role="alert">
+                                    <h5 class="alert-heading">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>Analysis Error
+                                    </h5>
+                                    <p id="error-message">An error occurred during analysis. Please try again.</p>
+                                    <hr>
+                                    <div class="d-grid">
+                                        <button class="btn btn-outline-danger" id="try-again-btn">Try Again</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Help Card -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-info-circle me-2"></i>Understanding Results
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <h6>Risk Levels</h6>
+                            <ul class="list-unstyled mb-3">
+                                <li class="mb-2">
+                                    <span class="badge bg-success me-2">None</span>
+                                    No litigation risk detected
+                                </li>
+                                <li class="mb-2">
+                                    <span class="badge bg-info me-2">Low</span>
+                                    Minor references to legal terms, likely not litigation-related
+                                </li>
+                                <li class="mb-2">
+                                    <span class="badge bg-warning me-2">Medium</span>
+                                    Contains litigation-related content, may require review
+                                </li>
+                                <li>
+                                    <span class="badge bg-danger me-2">High</span>
+                                    Significant litigation content or legal risk identified
+                                </li>
+                            </ul>
+                            <h6>Actions</h6>
+                            <p class="text-muted small">
+                                Documents with medium or high risk should be reviewed by legal counsel before migrations.
+                                High-risk documents will automatically be tagged for litigation hold when migrated.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-4 bg-dark text-white mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="small mb-0">&copy; 2025 {{ app_name }}. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <a href="/privacy" class="text-decoration-none text-muted small me-3">Privacy Policy</a>
+                    <a href="/terms" class="text-decoration-none text-muted small me-3">Terms of Service</a>
+                    <a href="/contact" class="text-decoration-none text-muted small">Contact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const textAnalysisForm = document.getElementById('text-analysis-form');
+            const fileAnalysisForm = document.getElementById('file-analysis-form');
+            const analysisLoading = document.getElementById('analysis-loading');
+            const analysisEmpty = document.getElementById('analysis-empty');
+            const analysisResults = document.getElementById('analysis-results');
+            const analysisError = document.getElementById('analysis-error');
+            const tryAgainBtn = document.getElementById('try-again-btn');
+            
+            // Helper to show the appropriate view
+            function showView(view) {
+                const views = [analysisLoading, analysisEmpty, analysisResults, analysisError];
+                views.forEach(v => v.classList.add('d-none'));
+                view.classList.remove('d-none');
+            }
+            
+            // Reset view
+            function resetView() {
+                showView(analysisEmpty);
+            }
+            
+            // Display error
+            function showError(message) {
+                document.getElementById('error-message').textContent = message || 'An error occurred during analysis. Please try again.';
+                showView(analysisError);
+            }
+            
+            // Display results
+            function displayResults(data) {
+                // Check if analysis was successful
+                if (!data || !data.success || !data.analysis) {
+                    showError('Invalid response from server');
+                    return;
+                }
+                
+                const analysis = data.analysis;
+                
+                // Set document name
+                const documentName = document.getElementById('document-name').value || 'Document Analysis';
+                document.getElementById('result-document-name').textContent = documentName;
+                
+                // Set timestamp
+                document.getElementById('result-timestamp').textContent = new Date().toLocaleString();
+                
+                // Set risk level
+                const riskLevel = analysis.risk_level || 'none';
+                const riskLevelBar = document.getElementById('risk-level-bar');
+                const riskLevelText = document.getElementById('risk-level-text');
+                
+                // Update risk level visuals
+                riskLevelBar.className = 'progress-bar';
+                riskLevelText.className = 'badge';
+                
+                switch(riskLevel) {
+                    case 'none':
+                        riskLevelBar.classList.add('bg-success');
+                        riskLevelBar.style.width = '0%';
+                        riskLevelText.classList.add('bg-success');
+                        riskLevelText.textContent = 'None';
+                        break;
+                    case 'low':
+                        riskLevelBar.classList.add('bg-info');
+                        riskLevelBar.style.width = '25%';
+                        riskLevelText.classList.add('bg-info');
+                        riskLevelText.textContent = 'Low';
+                        break;
+                    case 'medium':
+                        riskLevelBar.classList.add('bg-warning');
+                        riskLevelBar.style.width = '50%';
+                        riskLevelText.classList.add('bg-warning');
+                        riskLevelText.textContent = 'Medium';
+                        break;
+                    case 'high':
+                        riskLevelBar.classList.add('bg-danger');
+                        riskLevelBar.style.width = '100%';
+                        riskLevelText.classList.add('bg-danger');
+                        riskLevelText.textContent = 'High';
+                        break;
+                }
+                
+                // Set litigation terms
+                const termsContainer = document.getElementById('litigation-terms-detected');
+                const noTermsMessage = document.getElementById('no-terms-message');
+                termsContainer.innerHTML = '';
+                
+                const terms = analysis.litigation_terms_found || [];
+                if (terms.length > 0) {
+                    noTermsMessage.classList.add('d-none');
+                    terms.forEach(term => {
+                        const badge = document.createElement('span');
+                        badge.className = 'badge bg-danger me-2 mb-2';
+                        badge.textContent = term;
+                        termsContainer.appendChild(badge);
+                    });
+                } else {
+                    noTermsMessage.classList.remove('d-none');
+                }
+                
+                // Set legal categories
+                const categoriesContainer = document.getElementById('legal-categories');
+                const noCategoriesMessage = document.getElementById('no-categories-message');
+                categoriesContainer.innerHTML = '';
+                
+                const categories = analysis.legal_categories || [];
+                if (categories.length > 0) {
+                    noCategoriesMessage.classList.add('d-none');
+                    categories.forEach(category => {
+                        const badge = document.createElement('span');
+                        badge.className = 'badge bg-secondary me-2 mb-2';
+                        badge.textContent = category;
+                        categoriesContainer.appendChild(badge);
+                    });
+                } else {
+                    noCategoriesMessage.classList.remove('d-none');
+                }
+                
+                // Set analysis summary
+                document.getElementById('analysis-summary').textContent = analysis.summary || 'No summary provided.';
+                
+                // Set confidence score
+                const confidenceScore = analysis.confidence !== undefined ? (analysis.confidence * 100).toFixed(0) + '%' : 'N/A';
+                document.getElementById('confidence-score').textContent = confidenceScore;
+                
+                // Show results
+                showView(analysisResults);
+            }
+            
+            // Text Analysis Form Submit
+            textAnalysisForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const text = document.getElementById('text-content').value.trim();
+                const documentName = document.getElementById('document-name').value.trim() || 'Custom Text';
+                
+                if (!text) {
+                    showError('Please enter text to analyze');
+                    return;
+                }
+                
+                // Show loading state
+                showView(analysisLoading);
+                
+                // Send to API
+                fetch('/api/analyze-text', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        document_name: documentName
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    displayResults(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError(error.message);
+                });
+            });
+            
+            // File Analysis Form Submit
+            fileAnalysisForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const fileInput = document.getElementById('file-upload');
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    showError('Please select a file to analyze');
+                    return;
+                }
+                
+                const file = fileInput.files[0];
+                // Save filename to document name field for results display
+                document.getElementById('document-name').value = file.name;
+                
+                // Show loading state
+                showView(analysisLoading);
+                
+                // Create FormData
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                // Send to API
+                fetch('/api/analyze-file', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    displayResults(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError(error.message);
+                });
+            });
+            
+            // Try Again button
+            tryAgainBtn.addEventListener('click', function() {
+                resetView();
+            });
+            
+            // Reset view on tab change
+            const tabs = document.querySelectorAll('button[data-bs-toggle="tab"]');
+            tabs.forEach(tab => {
+                tab.addEventListener('shown.bs.tab', function() {
+                    resetView();
+                });
+            });
+        });
+    </script>
+    
+    <style>
+        /* Custom styles for the litigation analyzer */
+        .risk-indicator {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bs-secondary);
+            border-radius: 50%;
+        }
+        
+        .risk-icon {
+            font-size: 20px;
+            color: var(--bs-light);
+        }
+        
+        #analysis-results .progress {
+            background-color: var(--bs-gray-800);
+        }
+        
+        #analysis-empty .bi-search {
+            opacity: 0.2;
+        }
+        
+        .card-header .nav-tabs {
+            margin-bottom: -0.75rem;
+        }
+        
+        #analysis-summary {
+            white-space: pre-line;
+        }
+    </style>
+</body>
+</html>
