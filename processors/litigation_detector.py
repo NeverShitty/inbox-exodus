@@ -21,13 +21,16 @@ class LitigationDetector:
     Specialized in legal document analysis and litigation term detection
     """
     
-    def __init__(self, config: Config = None):
+    def __init__(self, config=None):
         """
         Initialize the litigation detector
         
         Args:
             config: Application configuration (optional)
         """
+        # Import here to avoid circular imports
+        from config import Config
+        
         self.config = config or Config()
         self.anthropic_api_key = os.environ.get('ANTHROPIC_API_KEY')
         
@@ -46,8 +49,8 @@ class LitigationDetector:
         # Load litigation terms from config
         self.litigation_terms = self.config.litigation_terms
 
-    def analyze_document(self, document_text: str, document_name: str = None, 
-                         document_metadata: Dict = None) -> Dict[str, Any]:
+    def analyze_document(self, document_text, document_name=None, 
+                         document_metadata=None):
         """
         Analyze a document for litigation indicators
         
@@ -158,7 +161,7 @@ class LitigationDetector:
             logger.warning("Using term-based results due to API error")
             return self._convert_term_results_to_full_analysis(term_based_results)
 
-    def _detect_litigation_terms(self, text: str) -> Dict[str, Any]:
+    def _detect_litigation_terms(self, text):
         """
         Perform simple term-based litigation detection
         
@@ -180,7 +183,7 @@ class LitigationDetector:
             "terms_found": terms_found
         }
         
-    def _convert_term_results_to_full_analysis(self, term_results: Dict[str, Any]) -> Dict[str, Any]:
+    def _convert_term_results_to_full_analysis(self, term_results):
         """
         Convert term-based results to a full analysis format
         
@@ -214,7 +217,7 @@ class LitigationDetector:
             "risk_level": risk_level
         }
         
-    def batch_analyze_documents(self, documents: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def batch_analyze_documents(self, documents):
         """
         Analyze multiple documents for litigation indicators
         
