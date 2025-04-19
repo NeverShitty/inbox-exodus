@@ -35,14 +35,27 @@ def _get_msal_app(cache=None):
         cache: Optional token cache
         
     Returns:
-        msal.ConfidentialClientApplication instance
+        msal.ConfidentialClientApplication instance or None if configuration is missing
     """
-    return msal.ConfidentialClientApplication(
-        current_app.config['MS_CLIENT_ID'],
-        authority=f"https://login.microsoftonline.com/{current_app.config['MS_TENANT_ID']}",
-        client_credential=current_app.config['MS_CLIENT_SECRET'],
-        token_cache=cache
-    )
+    try:
+        # Check if all required configuration is present
+        ms_client_id = current_app.config.get('MS_CLIENT_ID')
+        ms_tenant_id = current_app.config.get('MS_TENANT_ID') 
+        ms_client_secret = current_app.config.get('MS_CLIENT_SECRET')
+        
+        if not all([ms_client_id, ms_tenant_id, ms_client_secret]):
+            logger.error("Microsoft authentication is not fully configured. Missing one or more: MS_CLIENT_ID, MS_TENANT_ID, MS_CLIENT_SECRET")
+            return None
+            
+        return msal.ConfidentialClientApplication(
+            ms_client_id,
+            authority=f"https://login.microsoftonline.com/{ms_tenant_id}",
+            client_credential=ms_client_secret,
+            token_cache=cache
+        )
+    except Exception as e:
+        logger.error(f"Error initializing MSAL application: {str(e)}")
+        return None
 
 def _build_auth_url(state=None, redirect_uri=None):
     """
@@ -177,8 +190,26 @@ def connect():
     """
     Redirect to Microsoft OAuth login page
     """
-    auth_url = _build_auth_url()
-    return redirect(auth_url)
+    try:
+        # Get MSAL app
+        msal_app = _get_msal_app()
+        if not msal_app:
+            flash("Microsoft authentication is not configured correctly. Please contact administrator.", 'danger')
+            logger.error("Microsoft authentication failed: MSAL app configuration error")
+            return redirect(url_for('dashboard'))
+            
+        # Build authentication URL
+        auth_url = _build_auth_url()
+        if not auth_url:
+            flash("Could not generate Microsoft authentication URL. Please try again later.", 'danger')
+            logger.error("Microsoft authentication failed: Unable to generate auth URL")
+            return redirect(url_for('dashboard'))
+            
+        return redirect(auth_url)
+    except Exception as e:
+        logger.error(f"Unexpected error during Microsoft connect: {str(e)}")
+        flash("An error occurred while connecting to Microsoft. Please try again later.", 'danger')
+        return redirect(url_for('dashboard'))
 
 @microsoft_auth.route('/microsoft/callback')
 @login_required

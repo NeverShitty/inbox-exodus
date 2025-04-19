@@ -17,11 +17,20 @@ from pdfminer.layout import LAParams
 
 # Setup logger
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# Add a console handler if none exists
+if not logger.handlers:
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
 
 class FileExtractor:
     """
     File content extractor for multiple document formats
-    Supports PDF, DOCX, DOC, EML, TXT, and ZIP archives
+    Supports PDF, DOCX, DOC, EML, TXT, RTF, and ZIP archives
     """
     
     def __init__(self, config=None):
@@ -38,6 +47,8 @@ class FileExtractor:
         
         # Create temp directory if it doesn't exist
         os.makedirs(self.temp_dir, exist_ok=True)
+        
+        logger.info(f"FileExtractor initialized with temp directory: {self.temp_dir}")
     
     def extract_text(self, file_path: str, file_name: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -58,23 +69,38 @@ class FileExtractor:
         if not file_name:
             file_name = os.path.basename(file_path)
             
+        logger.info(f"Starting text extraction for file: {file_name}")
+        file_size = os.path.getsize(file_path) / 1024  # Size in KB
+        logger.info(f"File size: {file_size:.2f} KB")
+            
         # Detect file type using python-magic
         file_type = self._detect_file_type(file_path)
         logger.info(f"Detected file type: {file_type} for {file_name}")
         
         # Extract text based on file type
         try:
+            result = None
             if "pdf" in file_type.lower():
-                return self._extract_from_pdf(file_path, file_name)
+                logger.info(f"Processing as PDF: {file_name}")
+                result = self._extract_from_pdf(file_path, file_name)
             elif "word" in file_type.lower() or file_path.endswith(".docx"):
-                return self._extract_from_docx(file_path, file_name)
+                logger.info(f"Processing as Word document: {file_name}")
+                result = self._extract_from_docx(file_path, file_name)
             elif "email" in file_type.lower() or file_path.endswith(".eml"):
-                return self._extract_from_email(file_path, file_name)
+                logger.info(f"Processing as Email: {file_name}")
+                result = self._extract_from_email(file_path, file_name)
             elif "zip" in file_type.lower():
-                return self._extract_from_zip(file_path, file_name)
+                logger.info(f"Processing as ZIP archive: {file_name}")
+                result = self._extract_from_zip(file_path, file_name)
             else:
                 # Default to plain text extraction
-                return self._extract_from_text(file_path, file_name)
+                logger.info(f"Processing as plain text: {file_name}")
+                result = self._extract_from_text(file_path, file_name)
+                
+            # Log success
+            text_length = len(result.get("text", ""))
+            logger.info(f"Successfully extracted {text_length} characters from {file_name}")
+            return result
         except Exception as e:
             logger.error(f"Error extracting text from {file_name}: {str(e)}")
             return {
