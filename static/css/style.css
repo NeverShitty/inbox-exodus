@@ -32,6 +32,30 @@ section {
     font-weight: 500;
 }
 
+/* Migration Flow Animation */
+.migration-flow {
+    position: relative;
+    height: 200px;
+    margin: 2rem 0;
+    overflow: hidden;
+}
+
+.file-particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #4CAF50;
+    opacity: 0.8;
+    transition: all 2s ease-in-out;
+}
+
+.file-particle.organized {
+    transform: translateX(100%);
+    opacity: 1;
+    background: #2196F3;
+}
+
 /* Workflow steps */
 .workflow-step {
     transition: all 0.3s ease;

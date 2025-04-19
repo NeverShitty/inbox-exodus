@@ -195,3 +195,34 @@ function updateJobProgress(jobId) {
             console.error(`Error updating job ${jobId} progress:`, error);
         });
 }
+// Migration Flow Animation
+function createMigrationFlow() {
+    const container = document.getElementById('migrationFlow');
+    if (!container) return;
+
+    function createParticle() {
+        const particle = document.createElement('div');
+        particle.className = 'file-particle';
+        particle.style.left = '5%';
+        particle.style.top = Math.random() * 180 + 'px';
+        container.appendChild(particle);
+
+        // Trigger animation
+        setTimeout(() => {
+            particle.classList.add('organized');
+        }, 100);
+
+        // Remove particle after animation
+        setTimeout(() => {
+            container.removeChild(particle);
+        }, 2500);
+    }
+
+    // Create particles periodically
+    setInterval(createParticle, 300);
+}
+
+// Initialize animations when document loads
+document.addEventListener('DOMContentLoaded', () => {
+    createMigrationFlow();
+});
