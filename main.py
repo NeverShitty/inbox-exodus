@@ -231,56 +231,196 @@ def analyze_text():
 @app.route('/api/analyze-file', methods=['POST'])
 @login_required
 def analyze_file():
-    """Analyze file for litigation indicators"""
+    """Analyze file(s) for litigation indicators"""
     if 'file' not in request.files:
         return jsonify({
             'success': False,
             'error': 'No file provided'
         }), 400
-        
-    file = request.files['file']
     
-    if file.filename == '':
+    uploaded_files = request.files.getlist('file')
+    
+    if not uploaded_files or uploaded_files[0].filename == '':
         return jsonify({
             'success': False,
             'error': 'No file selected'
         }), 400
-        
-    # Save file to temporary location
-    filename = secure_filename(file.filename)
-    file_extension = os.path.splitext(filename)[1].lower()
-    temp_file_path = None
     
-    try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as temp:
-            file.save(temp.name)
-            temp_file_path = temp.name
-            
-            # Read file content as text (basic implementation for text files)
-            with open(temp_file_path, 'r', errors='ignore') as f:
-                try:
-                    text = f.read()
-                except UnicodeDecodeError:
-                    # If cannot read as text, return error
+    # Import the file extractor
+    from extractors.file_extractor import FileExtractor
+    
+    # If there's just one file, process it normally
+    if len(uploaded_files) == 1:
+        file = uploaded_files[0]
+        filename = secure_filename(file.filename)
+        file_extension = os.path.splitext(filename)[1].lower()
+        temp_file_path = None
+        
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as temp:
+                file.save(temp.name)
+                temp_file_path = temp.name
+                
+                # Use our file extractor to handle different file formats
+                extractor = FileExtractor(config)
+                extraction_result = extractor.extract_text(temp_file_path, filename)
+                
+                # Check if extraction was successful
+                if 'error' in extraction_result and extraction_result['error']:
                     return jsonify({
                         'success': False,
-                        'error': 'Cannot read file as text. Only text files are supported.'
+                        'error': extraction_result['error']
                     }), 400
                     
+                # Get extracted text and metadata
+                text = extraction_result.get('text', '')
+                metadata = extraction_result.get('metadata', {})
+                
+                if not text.strip():
+                    return jsonify({
+                        'success': False,
+                        'error': 'No text content could be extracted from the file.'
+                    }), 400
+                    
+                # Initialize the litigation detector
+                detector = LitigationDetector(config)
+                
+                # Analyze the document
+                analysis = detector.analyze_document(text, filename, metadata)
+                
+                # For ZIP files with multiple documents, add individual file analyses
+                if metadata.get('file_type') == 'ZIP Archive' and 'individual_results' in metadata:
+                    individual_analyses = []
+                    for file_result in metadata.get('individual_results', []):
+                        if not file_result.get('error') and file_result.get('text'):
+                            file_text = file_result.get('text', '')
+                            file_metadata = file_result.get('metadata', {})
+                            file_name = file_metadata.get('file_name', 'Unknown')
+                            
+                            # Analyze individual file
+                            file_analysis = detector.analyze_document(file_text, file_name, file_metadata)
+                            individual_analyses.append({
+                                'file': file_name,
+                                'analysis': file_analysis
+                            })
+                    
+                    # Add individual analyses to the main analysis result
+                    analysis['individual_analyses'] = individual_analyses
+                
+                # Create an audit log
+                log = models.AuditLog(
+                    user_id=current_user.id,
+                    action='litigation_analysis',
+                    status='success',
+                    source='file_upload',
+                    details={
+                        'filename': filename,
+                        'file_type': metadata.get('file_type', 'Unknown'),
+                        'is_litigation_related': analysis.get('is_litigation_related', False),
+                        'risk_level': analysis.get('risk_level', 'none'),
+                        'timestamp': datetime.utcnow().isoformat()
+                    }
+                )
+                db.session.add(log)
+                db.session.commit()
+                
+                return jsonify({
+                    'success': True,
+                    'analysis': analysis
+                })
+        except Exception as e:
+            logger.error(f"Error analyzing file: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': f'Analysis failed: {str(e)}'
+            }), 500
+        finally:
+            # Clean up temporary file
+            if temp_file_path and os.path.exists(temp_file_path):
+                os.unlink(temp_file_path)
+    
+    # If multiple files, create a ZIP in memory and process it
+    else:
+        temp_zip_path = None
+        try:
+            # Create a temporary ZIP file
+            temp_fd, temp_zip_path = tempfile.mkstemp(suffix='.zip')
+            os.close(temp_fd)
+            
+            # Write files to the ZIP
+            with zipfile.ZipFile(temp_zip_path, 'w') as zip_file:
+                for file in uploaded_files:
+                    filename = secure_filename(file.filename)
+                    temp_file_path = None
+                    
+                    try:
+                        # Save file to temporary location
+                        with tempfile.NamedTemporaryFile(delete=False) as temp:
+                            file.save(temp.name)
+                            temp_file_path = temp.name
+                            # Add file to ZIP
+                            zip_file.write(temp_file_path, filename)
+                    finally:
+                        # Clean up temporary file
+                        if temp_file_path and os.path.exists(temp_file_path):
+                            os.unlink(temp_file_path)
+            
+            # Process the ZIP file
+            extractor = FileExtractor(config)
+            extraction_result = extractor.extract_text(temp_zip_path, "Multiple Files.zip")
+            
+            # Check if extraction was successful
+            if 'error' in extraction_result and extraction_result['error']:
+                return jsonify({
+                    'success': False,
+                    'error': extraction_result['error']
+                }), 400
+                
+            # Get extracted text and metadata
+            text = extraction_result.get('text', '')
+            metadata = extraction_result.get('metadata', {})
+            
+            if not text.strip():
+                return jsonify({
+                    'success': False,
+                    'error': 'No text content could be extracted from the files.'
+                }), 400
+                
             # Initialize the litigation detector
             detector = LitigationDetector(config)
             
-            # Analyze the document
-            analysis = detector.analyze_document(text, filename, {'file_type': file_extension})
+            # Analyze the collective document
+            analysis = detector.analyze_document(text, "Multiple Files", metadata)
+            
+            # Process individual files in the ZIP
+            if 'individual_results' in metadata:
+                individual_analyses = []
+                for file_result in metadata.get('individual_results', []):
+                    if not file_result.get('error') and file_result.get('text'):
+                        file_text = file_result.get('text', '')
+                        file_metadata = file_result.get('metadata', {})
+                        file_name = file_metadata.get('file_name', 'Unknown')
+                        
+                        # Analyze individual file
+                        file_analysis = detector.analyze_document(file_text, file_name, file_metadata)
+                        individual_analyses.append({
+                            'file': file_name,
+                            'analysis': file_analysis
+                        })
+                
+                # Add individual analyses to the main analysis result
+                analysis['individual_analyses'] = individual_analyses
             
             # Create an audit log
             log = models.AuditLog(
                 user_id=current_user.id,
                 action='litigation_analysis',
                 status='success',
-                source='file_upload',
+                source='multiple_files_upload',
                 details={
-                    'filename': filename,
+                    'filename': "Multiple Files",
+                    'file_count': len(uploaded_files),
+                    'filenames': [secure_filename(f.filename) for f in uploaded_files],
                     'is_litigation_related': analysis.get('is_litigation_related', False),
                     'risk_level': analysis.get('risk_level', 'none'),
                     'timestamp': datetime.utcnow().isoformat()
@@ -293,16 +433,16 @@ def analyze_file():
                 'success': True,
                 'analysis': analysis
             })
-    except Exception as e:
-        logger.error(f"Error analyzing file: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': f'Analysis failed: {str(e)}'
-        }), 500
-    finally:
-        # Clean up temporary file
-        if temp_file_path and os.path.exists(temp_file_path):
-            os.unlink(temp_file_path)
+        except Exception as e:
+            logger.error(f"Error analyzing file: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': f'Analysis failed: {str(e)}'
+            }), 500
+        finally:
+            # Clean up temporary file
+            if temp_zip_path and os.path.exists(temp_zip_path):
+                os.unlink(temp_zip_path)
 
 # Run the Flask application
 if __name__ == "__main__":
