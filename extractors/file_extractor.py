@@ -224,24 +224,24 @@ class FileExtractor:
                             charset = chardet.detect(payload)['encoding']
                         if charset:
                             try:
-                                body += payload.decode(charset, errors='replace')
+                                body += payload.decode(charset, errors='replace') if isinstance(payload, bytes) else str(payload)
                             except UnicodeDecodeError:
-                                body += payload.decode('utf-8', errors='replace')
+                                body += payload.decode('utf-8', errors='replace') if isinstance(payload, bytes) else str(payload)
                         else:
-                            body += payload.decode('utf-8', errors='replace')
+                            body += payload.decode('utf-8', errors='replace') if isinstance(payload, bytes) else str(payload)
             else:
                 payload = msg.get_payload(decode=True)
                 charset = msg.get_content_charset()
-                if charset is None:
+                if charset is None and isinstance(payload, bytes):
                     # Try to detect encoding
                     charset = chardet.detect(payload)['encoding']
-                if charset:
+                if charset and isinstance(payload, bytes):
                     try:
                         body = payload.decode(charset, errors='replace')
                     except UnicodeDecodeError:
                         body = payload.decode('utf-8', errors='replace')
                 else:
-                    body = payload.decode('utf-8', errors='replace')
+                    body = str(payload) if payload else ""
             
             # Combine text for analysis
             text = f"Subject: {subject}\n\nFrom: {from_email}\nTo: {to_email}\nDate: {date}\n\n{body}"
