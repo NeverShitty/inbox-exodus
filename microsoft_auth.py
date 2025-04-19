@@ -10,7 +10,7 @@ import msal
 from flask import Blueprint, redirect, request, url_for, session, flash, current_app
 from flask_login import login_required, current_user
 
-from main import db
+from app import db
 import models
 
 # Create blueprint
