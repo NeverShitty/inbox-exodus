@@ -458,20 +458,28 @@
                 
                 const fileInput = document.getElementById('file-upload');
                 if (!fileInput.files || fileInput.files.length === 0) {
-                    showError('Please select a file to analyze');
+                    showError('Please select at least one file to analyze');
                     return;
                 }
-                
-                const file = fileInput.files[0];
-                // Save filename to document name field for results display
-                document.getElementById('document-name').value = file.name;
                 
                 // Show loading state
                 showView(analysisLoading);
                 
                 // Create FormData
                 const formData = new FormData();
-                formData.append('file', file);
+                
+                // Handle multiple files
+                const files = fileInput.files;
+                for (let i = 0; i < files.length; i++) {
+                    formData.append('file', files[i]);
+                }
+                
+                // Save filename(s) to document name field for results display
+                if (files.length === 1) {
+                    document.getElementById('document-name').value = files[0].name;
+                } else {
+                    document.getElementById('document-name').value = `Multiple Files (${files.length})`;
+                }
                 
                 // Send to API
                 fetch('/api/analyze-file', {

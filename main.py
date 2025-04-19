@@ -9,6 +9,7 @@ import logging
 import json
 import base64
 import tempfile
+import zipfile
 from datetime import datetime
 
 from flask import request, render_template, redirect, url_for, flash, session, jsonify
