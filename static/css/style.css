@@ -1,115 +1,199 @@
-/* Custom styles for Inbox Exodus */
+/* 
+ * Inbox Exodus - Main Stylesheet
+ * Custom styles for the web application
+ */
 
-/* General styles */
+/* General styling */
 body {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Icons', 'Helvetica Neue', sans-serif;
+    line-height: 1.5;
+    letter-spacing: -0.015em;
+    background: linear-gradient(to bottom, #000, #111);
+    color: #fff;
 }
 
-/* Push footer to bottom */
-footer {
-    margin-top: auto;
+:root {
+    --primary-color: #0066FF;
+    --accent-color: #00D1FF;
+    --text-color: #F0F0F0;
 }
 
-/* Navigation */
 .navbar-brand {
     font-weight: 600;
+    letter-spacing: -0.02em;
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-/* Cards */
-.card {
-    border: 0;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.15);
+.display-4 {
+    font-weight: 300;
+    letter-spacing: -0.025em;
 }
 
-.card-header {
-    background-color: transparent;
-    border-bottom: 1px solid var(--bs-gray-700);
+.lead {
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.9);
 }
 
-/* Litigation analyzer specific styles */
-.risk-indicator {
-    width: 40px;
-    height: 40px;
+section {
+    padding: 6rem 0;
+    background: #000;
+}
+
+.btn {
+    border-radius: 20px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* Migration Flow Animation */
+.migration-flow {
+    position: relative;
+    height: 200px;
+    margin: 2rem 0;
+    overflow: hidden;
+}
+
+.file-particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #4CAF50;
+    opacity: 0.8;
+    transition: all 2s ease-in-out;
+}
+
+.file-particle.organized {
+    transform: translateX(100%);
+    opacity: 1;
+    background: #2196F3;
+}
+
+/* Workflow steps */
+.workflow-step {
+    transition: all 0.3s ease;
+    border: 1px solid var(--bs-border-color);
+}
+
+.workflow-step:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Feature icons */
+.feature-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+/* Header section */
+.header-section {
+    padding: 5rem 0;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1740&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+}
+
+/* Custom button styles */
+.btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--bs-primary-dark, #0d47a1);
+    border-color: var(--bs-primary-dark, #0d47a1);
+}
+
+/* Dashboard specific styles */
+.dashboard-stat-card {
+    border-left: 4px solid var(--bs-primary);
+    transition: all 0.2s ease;
+}
+
+.dashboard-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Migration job status indicators */
+.status-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.35em 0.65em;
+    border-radius: 50rem;
+}
+
+.status-pending {
+    background-color: var(--bs-warning);
+    color: var(--bs-dark);
+}
+
+.status-in-progress {
+    background-color: var(--bs-info);
+    color: var(--bs-white);
+}
+
+.status-completed {
+    background-color: var(--bs-success);
+    color: var(--bs-white);
+}
+
+.status-failed {
+    background-color: var(--bs-danger);
+    color: var(--bs-white);
+}
+
+/* Folder tree visualization */
+.folder-tree {
+    font-family: monospace;
+    line-height: 1.5;
+}
+
+.folder-tree .folder-name {
+    font-weight: bold;
+    color: var(--bs-primary);
+}
+
+.folder-tree .file-name {
+    color: var(--bs-secondary);
+}
+
+/* Audit log entries */
+.audit-entry {
+    border-left: 3px solid var(--bs-gray-500);
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+}
+
+.audit-entry.success {
+    border-left-color: var(--bs-success);
+}
+
+.audit-entry.failure {
+    border-left-color: var(--bs-danger);
+}
+
+/* Progress indicators */
+.migration-progress {
+    height: 10px;
+    border-radius: 5px;
+}
+
+.rounded-circle {
+    border-radius: 50%;
+    width: 60px !important;
+    height: 60px !important;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--bs-secondary);
-    border-radius: 50%;
+    overflow: hidden;
 }
 
-.risk-icon {
-    font-size: 20px;
-    color: var(--bs-light);
-}
-
-#analysis-results .progress {
-    background-color: var(--bs-gray-800);
-}
-
-#analysis-empty .bi-search {
-    opacity: 0.2;
-}
-
-.card-header .nav-tabs {
-    margin-bottom: -0.75rem;
-}
-
-#analysis-summary {
-    white-space: pre-line;
-}
-
-/* Risk levels */
-.risk-level-none {
-    background-color: var(--bs-success);
-}
-
-.risk-level-low {
-    background-color: var(--bs-info);
-}
-
-.risk-level-medium {
-    background-color: var(--bs-warning);
-}
-
-.risk-level-high {
-    background-color: var(--bs-danger);
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.fade-in {
-    animation: fadeIn 0.5s ease-in-out;
-}
-
-/* Dashboard styles */
-.migration-step {
-    position: relative;
-}
-
-.migration-step::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    right: -50%;
-    width: 100%;
-    height: 2px;
-    background-color: var(--bs-primary);
-    z-index: -1;
-}
-
-.migration-step:last-child::after {
-    display: none;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .migration-step::after {
-        display: none;
-    }
+.rounded-circle.p-3 {
+    width: 48px !important;
+    height: 48px !important;
 }
