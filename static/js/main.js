@@ -1,197 +1,117 @@
 /**
- * Inbox Exodus - Main JavaScript
- * Client-side functionality for the web application
+ * Inbox Exodus Main JavaScript
+ * Contains general application functionality
  */
 
-function toggleMode(isLegalMode) {
-    fetch('/api/set-mode', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            legal_mode: isLegalMode
-        })
-    });
-
-    // Update UI elements
-    document.querySelectorAll('.litigation-feature').forEach(el => {
-        el.style.display = isLegalMode ? 'block' : 'none';
-    });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize API status indicators
-    updateApiStatus();
-
-    // Initialize any tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+// Enable Bootstrap tooltips and popovers
+document.addEventListener('DOMContentLoaded', function () {
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 
-    // Initialize any popovers
-    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+    // Initialize popovers
+    const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
     popoverTriggerList.map(function (popoverTriggerEl) {
         return new bootstrap.Popover(popoverTriggerEl);
     });
 
-    // Form validation
-    var forms = document.querySelectorAll('.needs-validation');
-    Array.prototype.slice.call(forms).forEach(function (form) {
-        form.addEventListener('submit', function (event) {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            form.classList.add('was-validated');
-        }, false);
-    });
+    // Legal Mode Toggle
+    const modeToggle = document.getElementById('modeToggle');
+    if (modeToggle) {
+        modeToggle.addEventListener('change', function() {
+            toggleMode(this.checked);
+        });
+    }
 });
 
 /**
- * Update API status indicators
+ * Toggle between normal and legal mode
+ * 
+ * @param {boolean} isLegalMode - Whether legal mode is enabled
  */
-function updateApiStatus() {
-    fetch('/status')
-        .then(response => response.json())
-        .then(data => {
-            // Update system status
-            const systemStatus = document.getElementById('system-status');
-            if (systemStatus) {
-                systemStatus.textContent = data.status;
-                systemStatus.className = 'badge bg-success';
-            }
-
-            // Update Microsoft API status
-            const msStatus = document.getElementById('ms-api-status');
-            if (msStatus) {
-                if (data.api_integration.microsoft) {
-                    msStatus.textContent = 'Connected';
-                    msStatus.className = 'badge bg-success';
-                } else {
-                    msStatus.textContent = 'Ready to Connect';
-                    msStatus.className = 'badge bg-info';
-                }
-            }
-
-            // Update Google API status
-            const googleStatus = document.getElementById('google-api-status');
-            if (googleStatus) {
-                if (data.api_integration.google) {
-                    googleStatus.textContent = 'Connected';
-                    googleStatus.className = 'badge bg-success';
-                } else {
-                    googleStatus.textContent = 'Ready to Connect';
-                    googleStatus.className = 'badge bg-info';
-                }
-            }
-
-            // Update OpenAI status
-            const openaiStatus = document.getElementById('openai-status');
-            if (openaiStatus) {
-                if (data.api_integration.openai) {
-                    openaiStatus.textContent = 'Ready';
-                    openaiStatus.className = 'badge bg-success';
-                } else {
-                    openaiStatus.textContent = 'Not Configured';
-                    openaiStatus.className = 'badge bg-warning';
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching API status:', error);
-        });
-}
-
-/**
- * Connect to Microsoft 365
- */
-function connectMicrosoft() {
-    // Redirect to Microsoft OAuth flow
-    window.location.href = '/connect/microsoft';
-}
-
-/**
- * Connect to Google Workspace
- */
-function connectGoogle() {
-    // Redirect to Google OAuth flow
-    window.location.href = '/connect/google';
-}
-
-/**
- * Start a new migration job
- */
-function startMigration() {
-    const form = document.getElementById('migration-form');
-    if (form) {
-        if (form.checkValidity()) {
-            // Show loading spinner
-            const submitBtn = document.getElementById('start-migration-btn');
-            if (submitBtn) {
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Starting...';
-                submitBtn.disabled = true;
-            }
-
-            // Submit the form
-            form.submit();
-        } else {
-            form.classList.add('was-validated');
-        }
+function toggleMode(isLegalMode) {
+    // Add your logic here to handle the mode toggle.
+    // This would likely involve updating the backend configuration
+    // or applying different CSS classes.
+    console.log("Legal mode is:", isLegalMode);
+    
+    // Example implementation (to be customized):
+    if (isLegalMode) {
+        // Apply legal mode styling or functionality
+        document.body.classList.add('legal-mode');
+        // Could make API call to update user preference
+    } else {
+        // Remove legal mode styling or functionality
+        document.body.classList.remove('legal-mode');
+        // Could make API call to update user preference
     }
 }
 
 /**
- * Update migration job progress
+ * Format file size in bytes to human readable format
+ * 
+ * @param {number} bytes - Size in bytes
+ * @param {number} decimals - Number of decimal places
+ * @returns {string} Formatted file size
  */
-function updateJobProgress(jobId) {
-    fetch(`/migrations/${jobId}/status`)
-        .then(response => response.json())
-        .then(data => {
-            const progressBar = document.getElementById(`progress-${jobId}`);
-            if (progressBar) {
-                const percentage = Math.round((data.processed_files / data.total_files) * 100);
-                progressBar.style.width = `${percentage}%`;
-                progressBar.setAttribute('aria-valuenow', percentage);
+function formatFileSize(bytes, decimals = 2) {
+    if (bytes === 0) return '0 Bytes';
 
-                const progressText = document.getElementById(`progress-text-${jobId}`);
-                if (progressText) {
-                    progressText.textContent = `${data.processed_files} / ${data.total_files} (${percentage}%)`;
-                }
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
-                // Update status badge
-                const statusBadge = document.getElementById(`status-${jobId}`);
-                if (statusBadge) {
-                    statusBadge.textContent = data.status;
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-                    // Update badge color based on status
-                    statusBadge.className = 'badge ';
-                    switch (data.status) {
-                        case 'pending':
-                            statusBadge.className += 'bg-warning';
-                            break;
-                        case 'in_progress':
-                            statusBadge.className += 'bg-info';
-                            break;
-                        case 'completed':
-                            statusBadge.className += 'bg-success';
-                            break;
-                        case 'failed':
-                            statusBadge.className += 'bg-danger';
-                            break;
-                        default:
-                            statusBadge.className += 'bg-secondary';
-                    }
-                }
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
 
-                // Continue polling if job is in progress
-                if (data.status === 'in_progress') {
-                    setTimeout(() => updateJobProgress(jobId), 5000);
-                }
-            }
-        })
-        .catch(error => {
-            console.error(`Error updating job ${jobId} progress:`, error);
-        });
+/**
+ * Format date to a human-readable string
+ * 
+ * @param {Date|string} date - Date object or date string
+ * @returns {string} Formatted date string
+ */
+function formatDate(date) {
+    if (!date) return 'N/A';
+    
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return 'Invalid date';
+    
+    return d.toLocaleString();
+}
+
+/**
+ * Show alert message
+ * 
+ * @param {string} message - The message to display
+ * @param {string} type - The type of alert (success, danger, warning, info)
+ * @param {string} containerId - The ID of the container to add the alert to
+ */
+function showAlert(message, type = 'info', containerId = 'alertContainer') {
+    const container = document.getElementById(containerId);
+    
+    if (!container) {
+        console.error(`Alert container with ID "${containerId}" not found`);
+        return;
+    }
+    
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.setAttribute('role', 'alert');
+    
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    container.appendChild(alertDiv);
+    
+    // Auto-close after 5 seconds
+    setTimeout(() => {
+        const bsAlert = new bootstrap.Alert(alertDiv);
+        bsAlert.close();
+    }, 5000);
 }

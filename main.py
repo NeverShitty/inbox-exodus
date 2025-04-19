@@ -249,13 +249,15 @@ def analyze_file():
     # Save file to temporary location
     filename = secure_filename(file.filename)
     file_extension = os.path.splitext(filename)[1].lower()
+    temp_file_path = None
     
     try:
         with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as temp:
             file.save(temp.name)
+            temp_file_path = temp.name
             
             # Read file content as text (basic implementation for text files)
-            with open(temp.name, 'r', errors='ignore') as f:
+            with open(temp_file_path, 'r', errors='ignore') as f:
                 try:
                     text = f.read()
                 except UnicodeDecodeError:
@@ -299,8 +301,8 @@ def analyze_file():
         }), 500
     finally:
         # Clean up temporary file
-        if os.path.exists(temp.name):
-            os.unlink(temp.name)
+        if temp_file_path and os.path.exists(temp_file_path):
+            os.unlink(temp_file_path)
 
 # Run the Flask application
 if __name__ == "__main__":
