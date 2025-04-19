@@ -3,22 +3,39 @@
  * Client-side functionality for the web application
  */
 
+function toggleMode(isLegalMode) {
+    fetch('/api/set-mode', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            legal_mode: isLegalMode
+        })
+    });
+
+    // Update UI elements
+    document.querySelectorAll('.litigation-feature').forEach(el => {
+        el.style.display = isLegalMode ? 'block' : 'none';
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize API status indicators
     updateApiStatus();
-    
+
     // Initialize any tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
-    
+
     // Initialize any popovers
     var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
     popoverTriggerList.map(function (popoverTriggerEl) {
         return new bootstrap.Popover(popoverTriggerEl);
     });
-    
+
     // Form validation
     var forms = document.querySelectorAll('.needs-validation');
     Array.prototype.slice.call(forms).forEach(function (form) {
@@ -45,7 +62,7 @@ function updateApiStatus() {
                 systemStatus.textContent = data.status;
                 systemStatus.className = 'badge bg-success';
             }
-            
+
             // Update Microsoft API status
             const msStatus = document.getElementById('ms-api-status');
             if (msStatus) {
@@ -57,7 +74,7 @@ function updateApiStatus() {
                     msStatus.className = 'badge bg-info';
                 }
             }
-            
+
             // Update Google API status
             const googleStatus = document.getElementById('google-api-status');
             if (googleStatus) {
@@ -69,7 +86,7 @@ function updateApiStatus() {
                     googleStatus.className = 'badge bg-info';
                 }
             }
-            
+
             // Update OpenAI status
             const openaiStatus = document.getElementById('openai-status');
             if (openaiStatus) {
@@ -116,7 +133,7 @@ function startMigration() {
                 submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Starting...';
                 submitBtn.disabled = true;
             }
-            
+
             // Submit the form
             form.submit();
         } else {
@@ -137,17 +154,17 @@ function updateJobProgress(jobId) {
                 const percentage = Math.round((data.processed_files / data.total_files) * 100);
                 progressBar.style.width = `${percentage}%`;
                 progressBar.setAttribute('aria-valuenow', percentage);
-                
+
                 const progressText = document.getElementById(`progress-text-${jobId}`);
                 if (progressText) {
                     progressText.textContent = `${data.processed_files} / ${data.total_files} (${percentage}%)`;
                 }
-                
+
                 // Update status badge
                 const statusBadge = document.getElementById(`status-${jobId}`);
                 if (statusBadge) {
                     statusBadge.textContent = data.status;
-                    
+
                     // Update badge color based on status
                     statusBadge.className = 'badge ';
                     switch (data.status) {
@@ -167,7 +184,7 @@ function updateJobProgress(jobId) {
                             statusBadge.className += 'bg-secondary';
                     }
                 }
-                
+
                 // Continue polling if job is in progress
                 if (data.status === 'in_progress') {
                     setTimeout(() => updateJobProgress(jobId), 5000);
